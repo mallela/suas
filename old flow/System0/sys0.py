@@ -9,7 +9,7 @@ def filterForTargets():
 def verifyFoldeImages():
 	tkMessageBox.showinfo("Hello!", " Choose the image folder you want to view(only)!")
 	pathToVerify = tk.askdirectory()
-	queue.viewImages(pathToVerify)
+	queue0.viewImages(pathToVerify)
 	return
 
 windowA = Tk()

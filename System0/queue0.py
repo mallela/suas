@@ -4,13 +4,31 @@ import numpy as np
 import os.path
 import Queue as Q
 import glob
+import os
+import time
+import easygui
+from PIL import Image
+# import PIL
+from PIL.ExifTags import TAGS
 
-pathSource = '/home/praneeta/Desktop/Tkin/System0/allImagesMAIN/'
-pathDestination = '/home/praneeta/Desktop/Tkin/System0/alphaNumeralTargets1/'
-pathEmergent = '/home/praneeta/Desktop/Tkin/System0/Emergent2/'
-noNew = '/home/praneeta/Desktop/Tkin/System0/noNew.JPG'
+pathSource = './allImagesMAIN/'
+pathDestination = './targets1/'
+pathEmergent = './emergent2/'
+noNew = './noNew.JPG'
 
-def viewImages(imPath):
+def saveToFolder(x,emergentOrTarget):
+	with open(pathSource+'DSC_%s.JPG'%(x), 'rb') as f:
+		data = f.read()
+	if emergentOrTarget == 0:
+		with open(pathDestination +'DSC_%s.JPG'%(x), 'wb') as f:
+			f.write(data)
+	else:
+		with open(pathEmergent +'DSC_%s.JPG'%(x), 'wb') as f:
+			f.write(data)
+
+	return
+
+def viewImages():
 	for i,img in enumerate([os.path.join(imPath,fn) for fn in next(os.walk(imPath))[2]]):
 		cv2.imshow("Image Verifier", cv2.resize(cv2.imread(img),None, fx = .25, fy = .25))
 		if cv2.waitKey(0)==27:
@@ -29,9 +47,11 @@ def showSavePrev(d):
 	cv2.imshow("prevIm", cv2.resize(cv2.imread(pathSource+'DSC_%s.JPG'%(d)),None, fx = .25, fy = .25))
 	l = cv2.waitKey(0)	
 	if l == ord('w'): # previous save
-		cv2.imwrite(pathDestination+'DSC_%s.JPG'%(folderSize(pathDestination)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d)))
+		# cv2.imwrite(pathDestination+'DSC_%s.JPG'%(folderSize(pathDestination)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d)))
+		saveToFolder(d,0)
 	elif l== ord('e'):
-		cv2.imwrite(pathEmergent+'DSC_%s.JPG'%(folderSize(pathEmergent)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d)))
+		# cv2.imwrite(pathEmergent+'DSC_%s.JPG'%(folderSize(pathEmergent)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d)))
+		saveToFolder(d,1)
 	cv2.destroyWindow("prevIm")# do not remove destroyWindow() for "prevIm"!
 	
 def qDeq(x):
@@ -50,15 +70,23 @@ def qDeq(x):
 
 def slideShow(d,folderSizeBefore, sizFlag):
 	if (sizFlag):
-		x = folderSizeBefore-1 # works over x = folderSizeBefore o.O idk why. Works in a strange way too. Starts looking at the folder last img first.
+		x = folderSizeBefore -1# works over x = folderSizeBefore o.O idk why. Works in a strange way too. Starts looking at the folder last img first.
 	else:
 		x = 0
 	for i in range(x, len(d)):
+		# blackHeader = cv2.copyMakeBorder(cv2.imread(pathSource+'DSC_%s.JPG'%(d[i])),200,0,0,0,cv2.BORDER_CONSTANT,value=(0,0,0))
+		# cv2.putText(blackHeader, Image.open(pathSource+'DSC_%s.JPG'%(d[i]))._getexif()[36867], (150,150),cv2.FONT_HERSHEY_SIMPLEX, 4,(255,255,255),5)
 		cv2.imshow("currentIm", cv2.resize(cv2.imread(pathSource+'DSC_%s.JPG'%(d[i])),None, fx = .25, fy = .25))
 		k = cv2.waitKey(0)
 		if k == ord('q'): # (save current) or (save current and prev)
 			# qq = save & move on ; qww = save, view previous,save prev
-			cv2.imwrite(pathDestination+'DSC_%s.JPG'%(folderSize(pathDestination)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d[i])))
+			saveToFolder(d[i],0)
+			# cv2.imwrite(pathDestination+'DSC_%s.JPG'%(folderSize(pathDestination)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d[i])))
+
+			# sysPath = pathDestination+ 'DSC_%s.JPG'%((folderSize(pathDestination)+1)
+			# time.sleep(2)
+			# os.system('scp ./alphaNumeralTargets1/*.JPG sony@192.168.0.102:/home/sony/Transfer')
+			# print 'adjbajyjfgju'
 			m = cv2.waitKey(0)
 			cv2.destroyWindow("currentIm")
 			if m == ord('w'): 
@@ -66,7 +94,8 @@ def slideShow(d,folderSizeBefore, sizFlag):
 			else:
 				pass
 		elif k ==ord('e'):
-			cv2.imwrite(pathEmergent+'DSC_%s.JPG'%(folderSize(pathEmergent)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d[i])))
+			# cv2.imwrite(pathEmergent+'DSC_%s.JPG'%(folderSize(pathEmergent)+1), cv2.imread(pathSource+'DSC_%s.JPG'%(d[i])))
+			saveToFolder(d[i],1)
 			m = cv2.waitKey(0)
 			cv2.destroyWindow("currentIm")
 			if m == ord('w'): 
@@ -96,13 +125,14 @@ def mainProcess():
 			print "new size is%d"%(siz)
 			sizFlag = 1		
 			d = qDeq(x)
+			updationMsgBox = easygui.msgbox("There has been an updation!", title = "Updates available")
 			slideShow(d,folderSizeBefore, sizFlag)
 			
 		else :
 			sizFlag = 0
 			print "waiting..."
-			k = cv2.waitKey(0)
-			if k:
+			# k = cv2.waitKey(0)
+			if cv2.waitKey(0):
 				cv2.imshow("currentIm", cv2.imread(noNew))
 		if cv2.waitKey(0)==27:
 			cv2.destroyAllWindows()

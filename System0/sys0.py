@@ -3,6 +3,7 @@ import tkFileDialog as tk
 import tkMessageBox
 import queue0
 
+
 def filterForTargets():
 	queue0.mainProcess()
 

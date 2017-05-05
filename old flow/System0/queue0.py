@@ -50,7 +50,7 @@ def qDeq(x):
 
 def slideShow(d,folderSizeBefore, sizFlag):
 	if (sizFlag):
-		x = folderSizeBefore # works over x = folderSizeBefore o.O idk why. Works in a strange way too. Starts looking at the folder last img first.
+		x = folderSizeBefore-1 # works over x = folderSizeBefore o.O idk why. Works in a strange way too. Starts looking at the folder last img first.
 	else:
 		x = 0
 	for i in range(x, len(d)):
